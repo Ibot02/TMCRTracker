@@ -1,0 +1,4 @@
+.stack-work/
+TMCRTracker.cabal
+stack.yaml.lock
+*~

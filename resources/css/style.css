@@ -1,0 +1,60 @@
+
+div {
+	display: flex;
+	width: auto;
+	height: auto;
+}
+
+body {
+	max-height: 100vh;
+	max-width: 100vw;
+	width: auto;
+	height: auto;
+}
+
+.items {
+	flex-direction: column;
+	overflow-y: auto;
+	margin: 0.5em;
+}
+
+.location.inaccessible.not_visited {
+	color: red;
+}
+
+.location.accessible.not_visited {
+	color: green;
+}
+
+.location.visited {
+	color: gray;
+}
+
+.settingsChoice {
+	flex-direction: column;
+}
+
+
+.locations {
+	flex-direction: column;
+	overflow-y: auto;
+	margin: 0.5em;
+}
+
+.region_selector {
+	margin: 0.5em;
+	margin-right: 0;
+}
+
+.hidden_region {
+	visibility: collapse;
+	position: absolute;
+}
+
+.close_region {
+	margin-left: 0.5em;
+}
+
+.region {
+	flex-direction: column;
+}
