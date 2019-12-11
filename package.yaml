@@ -1,5 +1,5 @@
 name:                TMCRTracker
-version:             0.1.0.0
+version:             0.2.0.0
 github:              "Ibot02/TMCRTracker"
 license:             BSD3
 author:              "Ibot02"
@@ -28,6 +28,9 @@ dependencies:
 - mtl
 - transformers
 - parsec
+- aeson
+- directory
+- bytestring
 
 library:
   source-dirs: src

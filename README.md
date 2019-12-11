@@ -15,15 +15,20 @@ There are no programm options yet (although I am planning on adding some).
 
 Unlike other trackers keys in dungeons are tracked even without keysanity, so locations might not show as being in logic even when you will be able to reach them for sure (i.e. temple of droplets will only show the first location in logic until you mark keys). These are positioned with the dungeon locations, not the other items.
 
+Dungeons currently don't show on the map whether any or all checks inside them are accessible.
+
 Every item that has logic rules is shown. This includes all types of rupees and an item called Untyped.FF which is used to make locations inaccessible.
 
-You can mark any number of any item, irrespective of the number available in the game.
+You can mark any number of some items, irrespective of the number available in the game.
+
+Some locations, those from open fusions, rupeemania and obscure locations, are not shown on the map at the moment.
+
+Some inaccessible locations are shown. Those are the ones that are defined in the logic even when inaccessible due to the selected settings (presumably to shuffle their items into the pool).
 
 ##Planned Features and Improvements
 
  - Improve logic file choice mechanism (currently hardcoded)
  - Some better way of handling settings choices
- - Item icons
- - locations shown on a map
- - maximal amounts for items
+ - locations shown on a map for openfusions, rupeemania and obscure locations
+ - maximal amounts for remaining items
  - possibly: show logic requirements for locations

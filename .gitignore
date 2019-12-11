@@ -2,3 +2,8 @@
 TMCRTracker.cabal
 stack.yaml.lock
 *~
+
+# generated files
+resources/items.json
+resources/css/items.css
+resources/css/locations.css

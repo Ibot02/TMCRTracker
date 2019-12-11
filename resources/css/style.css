@@ -1,6 +1,8 @@
 
 div {
 	display: flex;
+	align-items: flex-start;
+	flex-wrap: wrap;
 	width: auto;
 	height: auto;
 }
@@ -13,7 +15,11 @@ body {
 }
 
 .items {
-	flex-direction: column;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	width: 40%;
+	flex-shrink: 1;
 	overflow-y: auto;
 	margin: 0.5em;
 }
@@ -24,10 +30,16 @@ body {
 
 .location.accessible.not_visited {
 	color: green;
+	order: -1;
 }
 
 .location.visited {
 	color: gray;
+	order: 1;
+}
+
+.location {
+	margin: 2px;
 }
 
 .settingsChoice {
@@ -47,8 +59,7 @@ body {
 }
 
 .hidden_region {
-	visibility: collapse;
-	position: absolute;
+	display: none;
 }
 
 .close_region {

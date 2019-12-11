@@ -1,0 +1,29 @@
+.locations_global.map {
+	background: top left no-repeat;
+	zoom: 0.2;
+	position: relative;
+}
+
+.pin {
+	width: 40px;
+	height: 40px;
+	border: 2px solid black;
+	position: absolute;
+	transform: translate(-20px, -20px);
+}
+
+.pin:hover {
+	border-color: gold;
+}
+
+.pin.accessible.not_visited {
+	background: green;
+}
+
+.pin.inaccessible.not_visited {
+	background: red;
+}
+
+.pin.part_accessible.not_visited {
+	background: yellow;
+}
