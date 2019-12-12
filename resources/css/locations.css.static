@@ -1,5 +1,6 @@
 .locations_global.map {
 	background: top left no-repeat;
+	background-attachment: local;
 	zoom: 0.2;
 	position: relative;
 }

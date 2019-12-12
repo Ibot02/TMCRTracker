@@ -176,7 +176,7 @@ defaultLocationsMap = LocationsMap "/static/map_global.png" 3744 2376 $ map (\(M
     MapPin (Location "DampeKey" "") 1060 440,
     MapPin (Location "RoyalGraveHeartPiece" "") 810 230,
     MapPin (Location "RoyalValleyLostWoodsChest" "") 820 670,
-    MapPin (Location "FallsBehindWall" "") 220 480,
+    MapPin (Location "FallsBehindWall" "") 2020 480,
     MapPin (Location "FallsCliff" "") 2010 400,
     MapPin (Location "FallsTopCaveBomb" "") 2070 190,
     MapPin (Location "FallsTopCaveFree" "") 2070 190,
