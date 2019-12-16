@@ -36,7 +36,7 @@ import Data.Logic
 
 type SettingType = String
 
-data SettingsChoices m = SettingsChoices { chooseFlag :: SettingType -> String -> Bool -> m Bool, chooseDropdown :: SettingType -> (forall v. NonEmpty (String, v) -> m v) }
+data SettingsChoices m = SettingsChoices { chooseFlag :: SettingType -> String -> Bool -> m Bool, chooseDropdown :: SettingType -> String -> (forall v. NonEmpty (String, v) -> m v) }
 
 data Info = Info { infoName :: String, infoVersion :: String, infoCRC :: String } deriving (Eq, Ord, Show)
 
@@ -51,12 +51,12 @@ instance (Monad m) => Stream StringWithReplacements (StateT (Map String String) 
     uncons (StringWithReplacements (x:xs)) = return (Just (x,StringWithReplacements xs))
 
 chooseDefaults :: (Applicative m) => SettingsChoices m
-chooseDefaults = SettingsChoices (\_ _ b -> pure b) (\_ ((_, v) :| _) -> pure v)
+chooseDefaults = SettingsChoices (\_ _ b -> pure b) (\_ _ ((_, v) :| _) -> pure v)
 
 filterSettingsType :: (SettingType -> Bool) -> SettingsChoices m -> SettingsChoices m -> SettingsChoices m
 filterSettingsType p s s' = SettingsChoices (\t -> (chooseFlag $ if p t then s else s') t) (\t -> (chooseDropdown $ if p t then s else s') t)
 
-settingsChoices :: (Applicative m) => (String -> Bool -> m Bool) -> (forall v. NonEmpty (String, v) -> m v) -> SettingsChoices m --only choose actual settings (not gimmicks)
+settingsChoices :: (Applicative m) => (String -> Bool -> m Bool) -> (String -> (forall v. NonEmpty (String, v) -> m v)) -> SettingsChoices m --only choose actual settings (not gimmicks)
 settingsChoices cFlag cDropdown = filterSettingsType (== "Setting") (SettingsChoices (const cFlag) (const cDropdown)) chooseDefaults
 
 parseLogicFile :: (Monad m) => SettingsChoices m -> SourceName -> String -> m (Either ParseError ([Rule], Info))
@@ -97,7 +97,7 @@ parseDirectives c = fmap concat $ many $ try (spaces' *> (blankLine <|> (directi
             ("flag", flagType: flagName: flagQuery: _) -> when (and exec) $ chooseFlag' flagType flagName flagQuery False
             ("dropdown", dropdownType: dropdownName : defaultChoiceDescr : defaultChoice : opts) -> when (and exec) $ do
                 let opts' = makePairs opts
-                choice <- lift $ lift $ chooseDropdown c dropdownType ((defaultChoiceDescr, defaultChoice) :| opts')
+                choice <- lift $ lift $ chooseDropdown c dropdownType dropdownName ((defaultChoiceDescr, defaultChoice) :| opts')
                 lift $ modify $ Map.insert dropdownName choice
             ("ifdef", n:_) -> do
                 cond <- lift $ gets (Map.member n)

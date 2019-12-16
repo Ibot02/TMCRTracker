@@ -17,7 +17,8 @@ import Data.Items
 import Data.Locations
 
 import Data.List.NonEmpty (NonEmpty(..))
-import Data.Maybe (fromMaybe, maybe)
+import Data.Maybe (fromMaybe, maybe, catMaybes)
+import Data.List (stripPrefix)
 import Data.Bool (bool)
 import Control.Monad (when, void, unless, forM, forM_)
 import Control.Arrow (first, second, (&&&))
@@ -40,6 +41,29 @@ main = do
 logicFiles :: IO (NonEmpty (String, FilePath))
 logicFiles = return $ ("default", "resources/default.logic") :| []
 
+settingsPresets :: (Monad m) => (String, SettingsChoices m) -> IO [(String, SettingsChoices m)]
+settingsPresets (fallbackName, fallback) = do
+    settingsFiles <- filter ((\s -> (==s) . reverse . take (length s) . reverse) ".settings") <$> listDirectory "resources/"
+    choosers <- fmap catMaybes <$> forM settingsFiles $ \file -> do
+        contents <- lines <$> readFile ("resources/" ++ file)
+        case contents of
+            [] -> return Nothing
+            (presetName : choices) -> do
+                let flag settingsType flagName defaultValue =
+                        case catMaybes (fmap (stripPrefix ("!flag - " ++ flagName ++ " - ")) contents) of
+                            [] -> chooseFlag fallback settingsType flagName defaultValue
+                            ("true":_) -> return True
+                            ("false":_) -> return False
+                            _ -> return defaultValue
+                    dropdown settingsType dropdownName (c:|cs) =
+                        case catMaybes (fmap (stripPrefix ("!dropdown - " ++ dropdownName ++ " - ")) contents) of
+                            [] -> chooseDropdown fallback settingsType dropdownName (c :| cs)
+                            (c':_) -> case filter ((== c') . fst) (c:cs) of
+                                        [] -> return $ snd c
+                                        ((_,v):_) -> return v
+                return $ Just (presetName, SettingsChoices flag dropdown)
+    return (choosers ++ [(fallbackName, fallback)])
+
 setup :: ItemsData -> LocationsMap -> Window -> UI ()
 setup itemsData locationsMap window = evalContT $ do
     lift $ return window # set UI.title "The Minish Cap Randomizer Tracker"
@@ -50,8 +74,8 @@ setup itemsData locationsMap window = evalContT $ do
     heading <- lift $ UI.h1 # set UI.text "The Legend of Zelda: The Minish Cap Randomizer Tracker"
     box <- lift UI.new
     lift $ getBody window #+ [element heading, element box]
-    path <- liftIO logicFiles >>= chooseDropdown (askUI box) "Setting" -- todo: allow choosing any logic file instead
-    settings <- chooseDropdown (askUI box) "Setting" $ ("Default Settings", chooseDefaults) :| [("Custom Settings", askUI box)]
+    path <- liftIO logicFiles >>= chooseDropdown (askUI box) "Setting" "Logic" -- todo: allow choosing any logic file instead
+    settings <- (fmap (("Default Settings", chooseDefaults) :|) $ liftIO (settingsPresets ("Custom Settings", askUI box))) >>= chooseDropdown (askUI box) "Setting" "Settings"
     logicText <- liftIO $ readFile path
     logic <- parseLogicFile settings path logicText
     case logic of
@@ -91,13 +115,13 @@ setup itemsData locationsMap window = evalContT $ do
                     lift $ lift $ on UI.contextmenu location $ \(_,_) -> liftIO $ locationVisit False
                     lift $ lift $ flip (sink UI.class_) (return location) $ (\b b' -> "location location_" ++ locationName loc ++ bool (" region_location region_location_" ++ locationRegion loc) "" (locationRegion loc == "") ++ bool " inaccessible" " accessible" b ++ bool " not_visited" " visited" b') <$> facts accessible <*> locationVisited
                     lift $ lift $ return location # set UI.id_ ("location_" ++ locationName loc ++ bool ('_' : locationRegion loc) "" (locationRegion loc == ""))
-                    if locationRegion loc == "" then do
+                    if locationRegion loc == "" then
                         void $ lift $ lift $ return locations_text #+ [element location]
                     else modify $ first $ Map.alter (Just . maybe ([element location],[]) (first (element location:))) (locationRegion loc)
                     modify $ second $ Map.insert loc (accessible, locationVisited, locationVisit)
                     return ()
             (regions, locationsData) <- flip execStateT (Map.empty, Map.empty) $ buildLogicNetwork rules (Callbacks newItem' newHelper' newLocation')
-            (shownRegionE, showRegion) <- liftIO (newEvent :: IO (Event (Either (Int,Int) String), (Either (Int,Int) String -> IO ())))
+            (shownRegionE, showRegion) <- liftIO (newEvent :: IO (Event (Either (Int,Int) String), Either (Int,Int) String -> IO ()))
             shownRegionB <- liftIO $ stepper (Right "") shownRegionE
             selectors <- lift $ UI.new # set UI.id_ "region_selectors"
             let closeRegion = (UI.string "close" #. "close_region") >>= \c -> (on UI.click c (\() -> liftIO $ showRegion (Right "")) >> return c)
@@ -237,7 +261,7 @@ askUI parent = settingsChoices flag dropdown where
         value <- lift $ checkbox # get UI.checked
         lift $ delete el
         return value
-    dropdown (x :| xs) = do
+    dropdown _ (x :| xs) = do
         select <- lift $ UI.select #+ [UI.option # set UI.text t | (t,_) <- x:xs] # set UI.selection (Just 0)
         confirm <- lift $ UI.button # set UI.text "Ok"
         el <- lift $ makeSelectionSpace #+ [element select, element confirm]
