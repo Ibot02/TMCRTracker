@@ -189,7 +189,7 @@ defaultLocationsMap = LocationsMap "/static/map_global.png" 3744 2376 $ map (\(M
     MapPin (Location "CloudsSouthKill" "") 3400 1450,
     MapPin (Location "CloudsSouthMiddle" "") 3230 640,
     MapPin (Location "CloudsWestBottom" "") 3040 280,
-    MapPin (Location "CloudsWestLeft" "") 3040 150,
+    MapPin (Location "CloudsWestLeft" "") 3030 150,
     MapPin (Location "CloudsWestRight" "") 3090 150,
     MapPin (Location "CloudsSouthLeft" "") 3070 750,
     MapPin (Location "CloudsSouthRight" "") 3380 640,
@@ -375,7 +375,7 @@ defaultLocationsMap = LocationsMap "/static/map_global.png" 3744 2376 $ map (\(M
 --obscure
     MapPin (Location "HearthPot" "") 1760 1460,
     MapPin (Location "TopRightCloudWall" "") 3705 160,
-    MapPin (Location "TopLeftCloudWall" "") 3020 150,
+    MapPin (Location "TopLeftCloudWall" "") 3030 150,
     MapPin (Location "BottomLeftCloudWall" "") 3005 800,
     MapPin (Location "BottomMiddleCloudWall" "") 3280 620,
     MapPin (Location "BottomRightCloudWall" "") 3535 800,
