@@ -21,14 +21,11 @@ Every item that has logic rules is shown. This includes all types of rupees and 
 
 You can mark any number of some items, irrespective of the number available in the game.
 
-Some locations, those from open fusions, rupeemania and obscure locations, are not shown on the map at the moment.
-
 Some inaccessible locations are shown. Those are the ones that are defined in the logic even when inaccessible due to the selected settings (presumably to shuffle their items into the pool).
 
 ##Planned Features and Improvements
 
  - Improve logic file choice mechanism (currently hardcoded)
  - Some better way of handling settings choices
- - locations shown on a map for openfusions, rupeemania and obscure locations
  - maximal amounts for remaining items
  - possibly: show logic requirements for locations
