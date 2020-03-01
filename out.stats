@@ -10,7 +10,7 @@ containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG:273978
 data-default-class-0.1.2.0-4DQ5vBFTNGFfapRXhtzfu:106998
 dependent-map-0.3-J6d7kUT0ZYK7IgitBxw3Vc:86146
 dependent-sum-0.6.2.0-5De0IgisMpv5GobNkxtAW3:14688
-ghc-prim:                902559
+ghc-prim:                902977
 ghcjs-base-0.2.0.0-94o7qH5GqxYIuAX83RduIv:8760
 ghcjs-dom-jsffi-0.9.4.0-76Ln42WLg2C47qQnHuJVX0:117433
 ghcjs-prim-0.1.1.0-EXzjGVHQlAS2XAXcu0iCbS:10157
@@ -25,8 +25,8 @@ reflex-0.6.4-FXAEkBCj0S6IbvvKiT83zp:1475841
 reflex-dom-core-0.5.3-56aziq5arSQJD2SeOBXQNm:1777619
 semialign-1-2ZdWjfX2bRBKgQJ9K0XY1U:8996
 text-1.2.3.0-G7RNccSav6I3egGIwK0cpP:12505
-these-1-EA3bKa7y0pp7XGNr21nVuT:620584
-tmcr-0.1.0.0-GrjMcMTyUnMFlRuIBhG7ND:1241784
+these-1-EA3bKa7y0pp7XGNr21nVuT:620980
+tmcr-0.1.0.0-GrjMcMTyUnMFlRuIBhG7ND:1246552
 tracker-0.1.0.0-L31vTODJGoUCgPSLWvJOan:33374
 transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s:1071415
 
@@ -159,7 +159,7 @@ ghc-prim
     GHC.Classes:                        139
     GHC.IntWord64:                      3052
     GHC.Tuple:                          4081
-    GHC.Types:                          863831
+    GHC.Types:                          864249
 
 ghcjs-base-0.2.0.0-94o7qH5GqxYIuAX83RduIv
     Data.JSString:                      2245
@@ -267,10 +267,10 @@ text-1.2.3.0-G7RNccSav6I3egGIwK0cpP
     Data.Text.Internal:                 801
 
 these-1-EA3bKa7y0pp7XGNr21nVuT
-    Data.These:                         620584
+    Data.These:                         620980
 
 tmcr-0.1.0.0-GrjMcMTyUnMFlRuIBhG7ND
-    Tracker.TMCR.Logic:                 1071350
+    Tracker.TMCR.Logic:                 1076118
     Tracker.TMCR.Tracker:               170434
 
 tracker-0.1.0.0-L31vTODJGoUCgPSLWvJOan
@@ -284,5 +284,5 @@ transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s
 
 
 
-packed metadata: 1729765
+packed metadata: 1738846
 
