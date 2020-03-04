@@ -225,6 +225,13 @@ img.tracker-special-location-prize::after {
 .location-map-thumbnail-area {
   position: absolute;
   box-sizing: border-box;
+  font-size: 8pt;
+  display: flex;
+  flex-flow: row wrap;
+  place-content: space-evenly;
+}
+.location-map-thumbnail-area span {
+  text-shadow: -1px 0 white, 1px 0 white, 0 1px white, 0 -1px white;
 }
 .location-map-thumbnail-area:hover {
   background: #A002;

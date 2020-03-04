@@ -291,7 +291,8 @@ displayMapWidget (LocationMapNested img width height regions) tracker disp items
                                      <> "top: " <> pack (show y) <> "px; "
                                      <> "width: " <> pack (show width) <> "px; "
                                      <> "height: " <> pack (show height) <> "px;"))
-                (e, _) <- elAttr' "div" attr blank
+                (e, _) <- elAttr' "div" attr $
+                    displaySummary (area ^.. locationMapPins . traverse . locationMapPinContents . traverse . _Right) locations reachable
                 return (domEvent Click e, name, area)
             let f (ev, name, area) (evs, areas', (width, height)) = (fmap (const name) ev <> evs, 
                                                                      (name, area):areas',
