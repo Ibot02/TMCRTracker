@@ -1,22 +1,22 @@
 code size summary per package:
 
 attoparsec-0.13.2.2-LDgoYltg4bBFT04UziremI:65597
-base:                    649434
+base:                    651927
 base64-bytestring-1.0.0.2-KHbHJJf4UE22MWUN8WJjSN:18848
 bimap-0.3.3-LS56uN7KJ1BDD7ygUKS8oX:965
-bytestring-0.10.8.2-FBklFuapa1a7kq4yflY7Bt:4981
-common-0.1.0.0-1vx54q9TqsjXsaRBSd3nj:152786
-containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG:273978
+bytestring-0.10.8.2-FBklFuapa1a7kq4yflY7Bt:3031
+common-0.1.0.0-1vx54q9TqsjXsaRBSd3nj:156944
+containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG:275034
 data-default-class-0.1.2.0-4DQ5vBFTNGFfapRXhtzfu:106998
 dependent-map-0.3-J6d7kUT0ZYK7IgitBxw3Vc:86146
 dependent-sum-0.6.2.0-5De0IgisMpv5GobNkxtAW3:14688
-ghc-prim:                902977
+ghc-prim:                905430
 ghcjs-base-0.2.0.0-94o7qH5GqxYIuAX83RduIv:8760
 ghcjs-dom-jsffi-0.9.4.0-76Ln42WLg2C47qQnHuJVX0:117433
 ghcjs-prim-0.1.1.0-EXzjGVHQlAS2XAXcu0iCbS:10157
 integer-gmp:             6329
 jsaddle-0.9.7.0-9a2eUscARIGHd7M443yb4y:7278
-main:                    187122
+main:                    187138
 monoidal-containers-0.6-LQOsY8aSkl6ARSzrXIexy2:21223
 patch-0.0.2.0-7gofM7LNiLqLBnYDAlQsZX:70726
 primitive-0.6.3.0-KfguiTuxgILGqu8JEOpKRI:1293
@@ -25,10 +25,10 @@ reflex-0.6.4-FXAEkBCj0S6IbvvKiT83zp:1475841
 reflex-dom-core-0.5.3-56aziq5arSQJD2SeOBXQNm:1777619
 semialign-1-2ZdWjfX2bRBKgQJ9K0XY1U:8996
 text-1.2.3.0-G7RNccSav6I3egGIwK0cpP:12505
-these-1-EA3bKa7y0pp7XGNr21nVuT:620980
-tmcr-0.1.0.0-GrjMcMTyUnMFlRuIBhG7ND:1246552
+these-1-EA3bKa7y0pp7XGNr21nVuT:620974
+tmcr-0.1.0.0-GrjMcMTyUnMFlRuIBhG7ND:1312986
 tracker-0.1.0.0-L31vTODJGoUCgPSLWvJOan:33374
-transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s:1071415
+transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s:1219209
 
 
 code size per module:
@@ -49,7 +49,8 @@ base
     Data.Either:                        501
     Data.Foldable:                      212
     Data.Functor.Const:                 190
-    Data.Functor.Contravariant:         219
+    Data.Functor.Contravariant:         572
+    Data.Functor.Identity:              219
     Data.Functor.Product:               553
     Data.List.NonEmpty:                 2393
     Data.Maybe:                         5553
@@ -103,7 +104,7 @@ base
     GHC.Ptr:                            12033
     GHC.Read:                           12616
     GHC.Real:                           361
-    GHC.STRef:                          29787
+    GHC.STRef:                          31708
     GHC.Show:                           4163
     GHC.Stack.CCS:                      1268
     GHC.Stack.Types:                    14574
@@ -128,17 +129,17 @@ bimap-0.3.3-LS56uN7KJ1BDD7ygUKS8oX
     Data.Bimap:                         965
 
 bytestring-0.10.8.2-FBklFuapa1a7kq4yflY7Bt
-    Data.ByteString:                    4607
+    Data.ByteString:                    2657
     Data.ByteString.Internal:           374
 
 common-0.1.0.0-1vx54q9TqsjXsaRBSd3nj
-    Control.Monad.Choice:               9081
+    Control.Monad.Choice:               13239
     Data.Trie:                          18573
     Reflex.Dom.Image:                   125132
 
 containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG
     Data.IntMap.Internal:               43565
-    Data.IntMap.Strict:                 156283
+    Data.IntMap.Strict:                 157339
     Data.Map.Internal:                  74129
     Data.Set.Internal:                  1
 
@@ -159,7 +160,7 @@ ghc-prim
     GHC.Classes:                        139
     GHC.IntWord64:                      3052
     GHC.Tuple:                          4081
-    GHC.Types:                          864249
+    GHC.Types:                          866702
 
 ghcjs-base-0.2.0.0-94o7qH5GqxYIuAX83RduIv
     Data.JSString:                      2245
@@ -196,7 +197,7 @@ jsaddle-0.9.7.0-9a2eUscARIGHd7M443yb4y
     Language.Javascript.JSaddle.Arguments:7278
 
 main
-    Main:                               101837
+    Main:                               101853
     Reflex.Dom.ChoiceT:                 21050
     Tracker.Builtin:                    64235
 
@@ -267,11 +268,11 @@ text-1.2.3.0-G7RNccSav6I3egGIwK0cpP
     Data.Text.Internal:                 801
 
 these-1-EA3bKa7y0pp7XGNr21nVuT
-    Data.These:                         620980
+    Data.These:                         620974
 
 tmcr-0.1.0.0-GrjMcMTyUnMFlRuIBhG7ND
-    Tracker.TMCR.Logic:                 1076118
-    Tracker.TMCR.Tracker:               170434
+    Tracker.TMCR.Logic:                 1076443
+    Tracker.TMCR.Tracker:               236543
 
 tracker-0.1.0.0-L31vTODJGoUCgPSLWvJOan
     Tracker:                            11321
@@ -280,9 +281,9 @@ tracker-0.1.0.0-L31vTODJGoUCgPSLWvJOan
 
 transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s
     Control.Monad.Trans.Reader:         7734
-    Control.Monad.Trans.State.Strict:   1063681
+    Control.Monad.Trans.State.Strict:   1211475
 
 
 
-packed metadata: 1738846
+packed metadata: 1767253
 
