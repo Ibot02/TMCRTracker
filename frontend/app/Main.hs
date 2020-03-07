@@ -130,12 +130,17 @@ displayTracker tracker disp state = mdo
                   <> Map.fromSet (\i -> fmap (getItemState i extras) state) relevantItems
             locations' = Map.fromSet (\l -> fmap (Map.findWithDefault def l . view stateLocations) state) relevantLocations
             reachable = buildTracker items' (tracker ^. trackerLogic)
+            -- spheres = fmap (>>= traverse getSphereCount) $ countSpheres (tracker ^. trackerLogic) (fmap (fmap (view locationStateItem)) locations')
+        currentLocationStates <- traverse (sample . current . fromUniqDynamic) locations'
+        sphereState <- accum (flip updateSphereState) (updateSphereState [(l, Just i) | (l, s) <- Map.toList currentLocationStates, Just i <- [s ^. locationStateItem]] $ initialSphereState (tracker ^. trackerExtras . untrackedItems) (tracker ^. trackerLogic)) (fmap Map.toList $ mergeMap $ fmap (updated . fromUniqDynamic . fmap (view locationStateItem)) locations')
+        let spheres' = fmap (fmap (\case Sphere i -> Just i; UnknownSphere -> Nothing) . getSpheres) sphereState
+            spheres = Map.fromSet (\l -> fmap (Map.findWithDefault def l) spheres') relevantLocations
         elClass "div" "tracker-always" $ do
             forM (tracker ^. trackerInterface . alwaysWidget) $ \w -> do
-                displayTrackerWidget w tracker disp items' locations' reachable
-            displayLocationSelection tracker disp (view stateSelectedLocations <$> state) items' locations' reachable
+                displayTrackerWidget w tracker disp items' locations' reachable spheres
+            displayLocationSelection tracker disp (view stateSelectedLocations <$> state) items' locations' reachable spheres
         elClass "div" "tracker-sub-trackers" $
-            displaySubTrackers tracker disp scope items' locations' reachable
+            displaySubTrackers tracker disp scope items' locations' reachable spheres
         return ()
     return ev
 
@@ -159,8 +164,8 @@ locationDisplayState :: (Applicative f) => Map LocationName (f LocationState) ->
 locationDisplayState locations reachable l = (\ls r -> if ls ^. locationStateVisited then AllVisited else if r then AllReachable else NoneReachable) <$> Map.findWithDefault (pure def) l locations <*> Map.findWithDefault (pure False) l reachable
 
 
-displayLocationSelection :: forall t m. (MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => Tracker -> TrackerDisplayData -> UniqDynamic t (Set (Either Scope LocationName)) -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> m ()
-displayLocationSelection tracker disp selection items locations reachable = elDynClass "div" (fromUniqDynamic $ ffor selection $ \sel -> "selected-locations-view" <> bool "" " empty-selection" (null sel)) $ do
+displayLocationSelection :: forall t m. (MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => Tracker -> TrackerDisplayData -> UniqDynamic t (Set (Either Scope LocationName)) -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> Map LocationName (UniqDynamic t (Maybe Int)) -> m ()
+displayLocationSelection tracker disp selection items locations reachable spheres = elDynClass "div" (fromUniqDynamic $ ffor selection $ \sel -> "selected-locations-view" <> bool "" " empty-selection" (null sel)) $ do
     let summary :: UniqDynamic t LocationsDisplayState
         summary = do
             sel <- selection
@@ -180,7 +185,7 @@ displayLocationSelection tracker disp selection items locations reachable = elDy
         return (clearEl, markEl)
     evs <- elClass "div" "locations-list" $ dyn $ ffor (fromUniqDynamic selection) $ \sel -> do
         evs <- forM (sel ^.. folded) $ \l -> do
-            displayLocationListEntry tracker disp l items locations reachable
+            displayLocationListEntry tracker disp l items locations reachable spheres
         return $ mergeWith (<>) evs
     ev <- switchHold never evs
     tellEvent ev
@@ -188,8 +193,8 @@ displayLocationSelection tracker disp selection items locations reachable = elDy
     tellEvent $ fmap (\reachable' -> (markSelectedSatisfying reachable' `orElse` markSelected `orElse` unmarkSelected)) $ tag (current (traverse fromUniqDynamic reachable)) $ domEvent Click markEl
     
 
-displayLocationListEntry :: forall t m. (DomBuilder t m, PostBuild t m) => Tracker -> TrackerDisplayData -> Either Scope LocationName -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> m (Event t TrackerStateUpdates)
-displayLocationListEntry tracker disp (Left scope) items locations reachable = do
+displayLocationListEntry :: forall t m. (DomBuilder t m, PostBuild t m) => Tracker -> TrackerDisplayData -> Either Scope LocationName -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> Map LocationName (UniqDynamic t (Maybe Int)) -> m (Event t TrackerStateUpdates)
+displayLocationListEntry tracker disp (Left scope) items locations reachable spheres = do
     (e, _)  <- elClass' "div" "location-list-entry location-list-entry-scope" $ do
         displayImage $ disp ^. scopeIcon
         elClass "span" "scope-name" $ text $ displayScope scope
@@ -198,7 +203,7 @@ displayLocationListEntry tracker disp (Left scope) items locations reachable = d
             (displaySummary locs locations reachable) :: m ()
         return () :: m ()
     return $ fmap (const (setScope scope)) $ domEvent Click e
-displayLocationListEntry tracker disp (Right location) items locations reachable = do
+displayLocationListEntry tracker disp (Right location) items locations reachable spheres = do
     (e, _) <- elClass' "div" "location-list-entry location-list-entry-location" $ do
         let d = locationDisplayState locations reachable location
             attrClass d = ("location-name" <> case d of
@@ -213,6 +218,7 @@ displayLocationListEntry tracker disp (Right location) items locations reachable
                     Just itemName -> do
                         itemState <- Map.findWithDefault (pure def) itemName items
                         return $ Just (s' ^. locationStateVisited, itemName, itemState)
+        elClass "span" "location-sphere" $ dynText $ fmap (\case Nothing -> "[?]"; Just n -> "[" <> pack (show n) <> "]") $ fromUniqDynamic $ Map.findWithDefault (pure Nothing) location spheres
         elDynClass "span" (attrClass <$> fromUniqDynamic d) $ text location
         elClass "div" "location-item" $ dyn_ $ ffor (fromUniqDynamic withItemState) $ \s -> fromMaybe blank $ s >>= \(visitedLocation, itemName, itemState) ->
             fmap displayImage $ bool getNextImage getCurrentImage visitedLocation disp itemName (itemState ^. itemStateAmount)
@@ -240,8 +246,8 @@ displaySummary locs locationStates reachable = do
 displayScope :: Scope -> Text
 displayScope = foldr (\a b -> "/" <> a <> b) "/"
 
-displaySubTrackers :: (MonadFix m, MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => Tracker -> TrackerDisplayData -> UniqDynamic t Scope -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> m ()
-displaySubTrackers tracker disp scope items locations reachable = do
+displaySubTrackers :: (MonadFix m, MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => Tracker -> TrackerDisplayData -> UniqDynamic t Scope -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> Map LocationName (UniqDynamic t (Maybe Int)) -> m ()
+displaySubTrackers tracker disp scope items locations reachable spheres = do
     let scopeList = itoList $ tracker ^. trackerInterface . subTrackers
         opts = Map.fromList $ fmap (\(scope, _) -> (scope, displayScope scope)) $ scopeList
     ev' <- dyn $ ffor (fromUniqDynamic scope) $ \currentScope -> elClass "div" "scope-selector" $ do
@@ -255,23 +261,23 @@ displaySubTrackers tracker disp scope items locations reachable = do
         let shown currentScope = currentScope == widgetScope
             attrClass currentScope = "tracker-scope" <> bool " hidden" "" (shown currentScope)
         elDynClass "div" (attrClass <$> fromUniqDynamic scope) $ forM_ widgets $ \widget ->
-            displayTrackerWidget widget tracker disp items locations reachable
+            displayTrackerWidget widget tracker disp items locations reachable spheres
 
-displayTrackerWidget :: (MonadFix m, MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => TrackerWidget -> Tracker -> TrackerDisplayData -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> m ()
-displayTrackerWidget (TrackerWidgetMap l) tracker disp items locations reachable =
+displayTrackerWidget :: (MonadFix m, MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => TrackerWidget -> Tracker -> TrackerDisplayData -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> Map LocationName (UniqDynamic t (Maybe Int)) -> m ()
+displayTrackerWidget (TrackerWidgetMap l) tracker disp items locations reachable spheres =
     elClass "div" "tracker-widget tracker-widget-map" $
         displayMapWidget l tracker disp items locations reachable
-displayTrackerWidget (TrackerWidgetGrid g) tracker disp items locations reachable =
+displayTrackerWidget (TrackerWidgetGrid g) tracker disp items locations reachable spheres =
     elClass "div" "tracker-widget tracker-widget-grid" $
         iforM_ g $ \y row -> iforM_ row $ \x p ->
             elAttr "div" ("class" =: "tracker-item"
                        <> "style" =: ("grid-column-start: " <> pack (show (x + 1)) <> "; "
                                    <> "grid-row-start: "    <> pack (show (y + 1)) <> ";")) $
                 displayTrackerWidgetPrimitive disp (tracker ^. trackerExtras) items locations p
-displayTrackerWidget (TrackerWidgetLocationList locs) tracker disp items locations reachable =
+displayTrackerWidget (TrackerWidgetLocationList locs) tracker disp items locations reachable spheres =
     elClass "div" "tracker-widget tracker-widget-location-list" $ do
         evs <- forM locs $ \l ->
-            displayLocationListEntry tracker disp l items locations reachable
+            displayLocationListEntry tracker disp l items locations reachable spheres
         tellEvent $ mergeWith (<>) evs
 
 displayMapWidget :: (MonadFix m, MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => LocationMap -> Tracker -> TrackerDisplayData -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> m ()
