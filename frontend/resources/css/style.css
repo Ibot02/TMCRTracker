@@ -12,6 +12,7 @@
   border-left: 1px solid black;
   z-index: 5;
   background: #FFFF;
+  padding: 1em;
 }
 .settings_container.hidden {
   transform: translate(200px, 0px);
@@ -20,7 +21,6 @@
 .settings {
   display: flex;
   flex-direction: column;
-  padding: 1em;
 }
 .settings * {
   flex-direction: row;

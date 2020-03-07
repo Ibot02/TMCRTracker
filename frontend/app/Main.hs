@@ -74,15 +74,21 @@ main = mainWidgetWithHead headWidget $ mdo
         (undoE, _) <- elDynAttr' "input" (undoAttr <$> fromUniqDynamic (canUndo <$> trackerState)) $ blank
         (redoE, _) <- elDynAttr' "input" (redoAttr <$> fromUniqDynamic (canRedo <$> trackerState)) $ blank
         return (fmap (const undo) $ domEvent Click undoE, fmap (const redo) $ domEvent Click redoE)
-    tracker <- mdo
+    (tracker, mapScale) <- mdo
         shown <- toggle False $ domEvent Click e
         let attr = fmap (\b -> "class" =: ("settings_container" <>  bool " hidden" "" b)) shown
         -- savedSettings <- (>>= readMaybe . unpack ) <$> getFromStorage "settings"
         let defaultSettings = mempty --fromMaybe mempty savedSettings
         settings <- foldDynMaybe apply defaultSettings settingsChanges
         (tracker, queries) <- flip runQueryT settings $ execChoiceT $ getTracker $ Builtin TMCR
-        (settingsChanges, e) <- elDynAttr "div" attr $ do
+        (settingsChanges, e, mapScale) <- elDynAttr "div" attr $ do
             (e, _) <- elClass' "div" "settingsToggleShown" blank
+            mapScale <- do
+                elAttr "label" ("for" =: "map-scale") $ text "Map Scale:"
+                r <- rangeInput $ def &
+                    rangeInputConfig_initialValue .~ 1 &
+                    rangeInputConfig_attributes .~ pure ("id" =: "map-scale" <> "min" =: "0.2" <> "max" =: "2" <> "step" =: "0.01")
+                return $ uniqDynamic $ _rangeInput_value r
             queryKeys <- holdUniqDyn $ fmap (MM.keysSet . getUserChoiceQuery) $ incrementalToDynamic queries
             settingsChanges' <- elClass "div" "settings" $ dyn $ ffor queryKeys $ \q -> do
                 currentSettings <- Map.mapMaybe getFirst <$> sample (current settings)
@@ -106,21 +112,21 @@ main = mainWidgetWithHead headWidget $ mdo
                             elDynClass "div" ((("settings_numberbox_" <> key) <>) <$> hiddenClass) $ do
                                 input <- inputElement $ def
                                     & inputElementConfig_elementConfig . elementConfig_initialAttributes .~ mapKeysToAttributeName ("type" =: "number" <> "placeholder" =: label)
-                                    & inputElementConfig_initialValue .~ fromMaybe "0" (fmap (pack . show) (Map.lookup key currentSettings))
+                                    & inputElementConfig_initialValue .~ fromMaybe "" (fmap (pack . show) (Map.lookup key currentSettings))
                                 return $ fmap (PatchMap . (key =:) . Just . First . Just) $ mapMaybe (readMaybe @Int . unpack) $ updated $ _inputElement_value input
             settingsChanges <- switchHold never settingsChanges'
-            return (settingsChanges, e)
-        return tracker
+            return (settingsChanges, e, mapScale)
+        return (tracker, mapScale)
     trackerState <- accumMaybe (&) def changes
     changes <- elClass "div" "tracker-container" $ do
         changes' <- dyn $ ffor tracker $ \(tracker, disp) -> do
-            stateChanges <- displayTracker tracker disp trackerState
+            stateChanges <- displayTracker tracker disp mapScale trackerState
             return $ give (tracker ^. trackerExtras) $ fmap apply $ stateChanges <> undoEvent <> redoEvent
         switchHold never changes'
     return ()
 
-displayTracker :: (PostBuild t m, MonadHold t m, MonadFix m, DomBuilder t m) => Tracker -> TrackerDisplayData -> UniqDynamic t TrackerState -> m (Event t TrackerStateUpdates)
-displayTracker tracker disp state = mdo
+displayTracker :: (PostBuild t m, MonadHold t m, MonadFix m, DomBuilder t m) => Tracker -> TrackerDisplayData -> UniqDynamic t Float -> UniqDynamic t TrackerState -> m (Event t TrackerStateUpdates)
+displayTracker tracker disp mapScale state = mdo
     let scope = fmap (view stateCurrentScope) state
     ((), ev) <- runEventWriterT $ do
         let relevantItems = (tracker ^. (trackerExtras . nonLogicTrackedItems . each . to Set.singleton) <..> (trackerLogic . each . ruleBody . traverse . _Left . to Set.singleton)) Set.\\ (tracker ^. trackerExtras . untrackedItems . each . _1 . to Set.singleton)
@@ -137,10 +143,10 @@ displayTracker tracker disp state = mdo
             spheres = Map.fromSet (\l -> fmap (Map.findWithDefault def l) spheres') relevantLocations
         elClass "div" "tracker-always" $ do
             forM (tracker ^. trackerInterface . alwaysWidget) $ \w -> do
-                displayTrackerWidget w tracker disp items' locations' reachable spheres
+                displayTrackerWidget w tracker disp mapScale items' locations' reachable spheres
             displayLocationSelection tracker disp (view stateSelectedLocations <$> state) items' locations' reachable spheres
         elClass "div" "tracker-sub-trackers" $
-            displaySubTrackers tracker disp scope items' locations' reachable spheres
+            displaySubTrackers tracker disp mapScale scope items' locations' reachable spheres
         return ()
     return ev
 
@@ -246,8 +252,8 @@ displaySummary locs locationStates reachable = do
 displayScope :: Scope -> Text
 displayScope = foldr (\a b -> "/" <> a <> b) "/"
 
-displaySubTrackers :: (MonadFix m, MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => Tracker -> TrackerDisplayData -> UniqDynamic t Scope -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> Map LocationName (UniqDynamic t (Maybe Int)) -> m ()
-displaySubTrackers tracker disp scope items locations reachable spheres = do
+displaySubTrackers :: (MonadFix m, MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => Tracker -> TrackerDisplayData -> UniqDynamic t Float -> UniqDynamic t Scope -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> Map LocationName (UniqDynamic t (Maybe Int)) -> m ()
+displaySubTrackers tracker disp mapScale scope items locations reachable spheres = do
     let scopeList = itoList $ tracker ^. trackerInterface . subTrackers
         opts = Map.fromList $ fmap (\(scope, _) -> (scope, displayScope scope)) $ scopeList
     ev' <- dyn $ ffor (fromUniqDynamic scope) $ \currentScope -> elClass "div" "scope-selector" $ do
@@ -261,20 +267,21 @@ displaySubTrackers tracker disp scope items locations reachable spheres = do
         let shown currentScope = currentScope == widgetScope
             attrClass currentScope = "tracker-scope" <> bool " hidden" "" (shown currentScope)
         elDynClass "div" (attrClass <$> fromUniqDynamic scope) $ forM_ widgets $ \widget ->
-            displayTrackerWidget widget tracker disp items locations reachable spheres
+            displayTrackerWidget widget tracker disp mapScale items locations reachable spheres
 
-displayTrackerWidget :: (MonadFix m, MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => TrackerWidget -> Tracker -> TrackerDisplayData -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> Map LocationName (UniqDynamic t (Maybe Int)) -> m ()
-displayTrackerWidget (TrackerWidgetMap l) tracker disp items locations reachable spheres =
-    elClass "div" "tracker-widget tracker-widget-map" $
+displayTrackerWidget :: (MonadFix m, MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => TrackerWidget -> Tracker -> TrackerDisplayData -> UniqDynamic t Float -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> Map LocationName (UniqDynamic t (Maybe Int)) -> m ()
+displayTrackerWidget (TrackerWidgetMap l) tracker disp mapScale items locations reachable spheres =
+    let attr s = ("class" =: "tracker-widget tracker-widget-map" <> "style" =: ("transform: scale(" <> pack (show s) <> "); transform-origin: 0 0;"))
+    in elDynAttr "div" (attr <$> fromUniqDynamic mapScale) $
         displayMapWidget l tracker disp items locations reachable
-displayTrackerWidget (TrackerWidgetGrid g) tracker disp items locations reachable spheres =
+displayTrackerWidget (TrackerWidgetGrid g) tracker disp mapScale items locations reachable spheres =
     elClass "div" "tracker-widget tracker-widget-grid" $
         iforM_ g $ \y row -> iforM_ row $ \x p ->
             elAttr "div" ("class" =: "tracker-item"
                        <> "style" =: ("grid-column-start: " <> pack (show (x + 1)) <> "; "
                                    <> "grid-row-start: "    <> pack (show (y + 1)) <> ";")) $
                 displayTrackerWidgetPrimitive disp (tracker ^. trackerExtras) items locations p
-displayTrackerWidget (TrackerWidgetLocationList locs) tracker disp items locations reachable spheres =
+displayTrackerWidget (TrackerWidgetLocationList locs) tracker disp mapScale items locations reachable spheres =
     elClass "div" "tracker-widget tracker-widget-location-list" $ do
         evs <- forM locs $ \l ->
             displayLocationListEntry tracker disp l items locations reachable spheres
