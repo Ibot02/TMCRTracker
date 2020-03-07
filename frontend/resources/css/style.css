@@ -310,3 +310,6 @@ span.area-name {
 .pin.all-reachable {
   background: #080A;
 }
+.pin.all-visited {
+  border-color: #0004;
+}
