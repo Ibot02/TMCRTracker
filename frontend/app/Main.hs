@@ -92,8 +92,8 @@ main = mainWidgetWithHead headWidget $ mdo
             queryKeys <- holdUniqDyn $ fmap (MM.keysSet . getUserChoiceQuery) $ incrementalToDynamic queries
             settingsChanges' <- elClass "div" "settings" $ dyn $ ffor queryKeys $ \q -> do
                 currentSettings <- Map.mapMaybe getFirst <$> sample (current settings)
-                fmap (mergeWith (<>)) $ forM (Set.toList q) $ \k -> do
-                    dynV <- holdUniqDyn $ fmap ((MM.! k) . getUserChoiceQuery) $ incrementalToDynamic queries
+                settingsChanges' <- fmap (mergeWith (<>)) $ forM (Set.toList q) $ \(i, k) -> do
+                    dynV <- holdUniqDyn $ fmap ((MM.! (i, k)) . getUserChoiceQuery) $ incrementalToDynamic queries
                     let hiddenClass = bool "" " hidden" . (== mempty) <$> dynV
                     case k of
                         UserChoiceOption key options ->
