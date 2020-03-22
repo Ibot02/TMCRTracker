@@ -32,9 +32,15 @@ import Data.Bool (bool)
 import Text.Read (readMaybe)
 import Data.Maybe (fromMaybe)
 import Data.Monoid
-import Data.Foldable (fold)
+import Data.Foldable (fold, toList)
 import Data.Void (absurd)
 import Control.Monad.Fix
+
+import Text.Printf (printf)
+
+import qualified Data.ByteString as BS
+
+import qualified Data.Digest.CRC32 as CRC
 
 import Data.FileEmbed
 
@@ -114,6 +120,10 @@ main = mainWidgetWithHead headWidget $ mdo
                                     & inputElementConfig_elementConfig . elementConfig_initialAttributes .~ mapKeysToAttributeName ("type" =: "number" <> "placeholder" =: label)
                                     & inputElementConfig_initialValue .~ fromMaybe "" (fmap (pack . show) (Map.lookup key currentSettings))
                                 return $ fmap (PatchMap . (key =:) . Just . First . Just) $ mapMaybe (readMaybe @Int . unpack) $ updated $ _inputElement_value input
+                let settingsHash = queryKeys >>= \keys -> settings >>= \s -> return $ BS.pack $ toList $ flip Map.fromSet keys $ \(i, key) -> hashByte key s
+                elAttr "div" ("class" =: "settings-hash"
+                            <> "title" =: "Settings Hash") $ dynText $ fmap (pack . printf "%08lX" . CRC.digest) settingsHash
+                return settingsChanges'
             settingsChanges <- switchHold never settingsChanges'
             return (settingsChanges, e, mapScale)
         return (tracker, mapScale)
