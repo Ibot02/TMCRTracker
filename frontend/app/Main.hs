@@ -117,7 +117,7 @@ main = mainWidgetWithHead headWidget $ mdo
                         UserChoiceNumber key label ->
                             elDynClass "div" ((("settings_numberbox_" <> key) <>) <$> hiddenClass) $ do
                                 input <- inputElement $ def
-                                    & inputElementConfig_elementConfig . elementConfig_initialAttributes .~ mapKeysToAttributeName ("type" =: "number" <> "placeholder" =: label)
+                                    & inputElementConfig_elementConfig . elementConfig_initialAttributes .~ mapKeysToAttributeName ("type" =: "number" <> "placeholder" =: label <> "title" =: label)
                                     & inputElementConfig_initialValue .~ fromMaybe "" (fmap (pack . show) (Map.lookup key currentSettings))
                                 return $ fmap (PatchMap . (key =:) . Just . First . Just) $ mapMaybe (readMaybe @Int . unpack) $ updated $ _inputElement_value input
                 let settingsHash = queryKeys >>= \keys -> settings >>= \s -> return $ BS.pack $ toList $ flip Map.fromSet keys $ \(i, key) -> hashByte key s
