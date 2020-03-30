@@ -41,6 +41,8 @@ import Text.Printf (printf)
 import qualified Data.ByteString as BS
 
 import qualified Data.Digest.CRC32 as CRC
+import Data.Bits
+import Data.Word
 
 import Data.FileEmbed
 
@@ -120,9 +122,11 @@ main = mainWidgetWithHead headWidget $ mdo
                                     & inputElementConfig_elementConfig . elementConfig_initialAttributes .~ mapKeysToAttributeName ("type" =: "number" <> "placeholder" =: label <> "title" =: label)
                                     & inputElementConfig_initialValue .~ fromMaybe "" (fmap (pack . show) (Map.lookup key currentSettings))
                                 return $ fmap (PatchMap . (key =:) . Just . First . Just) $ mapMaybe (readMaybe @Int . unpack) $ updated $ _inputElement_value input
-                let settingsHash = queryKeys >>= \keys -> settings >>= \s -> return $ BS.pack $ toList $ flip Map.fromSet keys $ \(i, key) -> hashByte key s
+                let settingsHash = queryKeys >>= \keys -> settings >>= \s -> return $ CRC.digest $ BS.pack $ toList $ flip Map.fromSet keys $ \(i, key) -> hashByte key s
                 elAttr "div" ("class" =: "settings-hash"
-                            <> "title" =: "Settings Hash") $ dynText $ fmap (pack . printf "%08lX" . CRC.digest) settingsHash
+                            <> "title" =: "Settings Hash") $ do
+                    dynText $ fmap (pack . printf "%08lX ") settingsHash
+                    displayHashIcons settingsHash
                 return settingsChanges'
             settingsChanges <- switchHold never settingsChanges'
             return (settingsChanges, e, mapScale)
@@ -134,6 +138,15 @@ main = mainWidgetWithHead headWidget $ mdo
             return $ give (tracker ^. trackerExtras) $ fmap apply $ stateChanges <> undoEvent <> redoEvent
         switchHold never changes'
     return ()
+
+displayHashIcons :: (PostBuild t m, DomBuilder t m) => Dynamic t Word32 -> m ()
+displayHashIcons settingsHash = do
+    let firstVal = fmap (\hash -> fromIntegral $ 63 .&. shiftR hash 8) settingsHash
+        secondVal = fmap (\hash -> fromIntegral $ 63 .&. shiftR hash 16) settingsHash
+        img = $$(staticImage "resources/images/hashicons.png")
+        attr val = "style" =: ("background-image: url(" <> toURI img <> "); background-position-y: -" <> pack (show (val * 16)) <> "px; width: 16px; height: 16px; overflow: hidden;")  <> "class" =: "hash-icon"
+    elDynAttr "div" (attr <$> firstVal) blank
+    elDynAttr "div" (attr <$> secondVal) blank
 
 displayTracker :: (PostBuild t m, MonadHold t m, MonadFix m, DomBuilder t m) => Tracker -> TrackerDisplayData -> UniqDynamic t Float -> UniqDynamic t TrackerState -> m (Event t TrackerStateUpdates)
 displayTracker tracker disp mapScale state = mdo
