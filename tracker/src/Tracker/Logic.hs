@@ -110,14 +110,14 @@ changesFromItems relevants items = Heap.fromList $ [(n, l) | (n,i) <- items, l <
 updateSpheres :: forall i l. (Ord i, Ord l) => SphereState i l -> MinPrioHeap SphereCount l -> Map l SphereCount
 updateSpheres state heap = case Heap.view heap of
         Nothing -> sphereStateSpheres state
-        Just ((c,l),heap') -> let n = sphereStateSpheres state Map.! l;
+        Just ((_,l),heap') -> let n = sphereStateSpheres state Map.! l;
                                       getSphere (Left i) = fmap (incrementSphere . getLocSphere) $ Map.keys $ Map.filter (==i) $ sphereStateItems state;
                                       getSphere (Right l) = [getLocSphere l];
                                       getLocSphere l = sphereStateSpheres state Map.! l;
                                       n' = evalSphereCount $ substituteMany getSphere $ sphereStateLogic state Map.! l;
                                       heap'' :: MinPrioHeap SphereCount l;
                                       heap'' = (Heap.fromList [(min n n', l') | l' <- toList $ Map.findWithDefault mempty (Right l) $ sphereStateRelevants state]) <> (maybe mempty (\i -> changesFromItems (sphereStateRelevants state) [(min n n', i)]) $ Map.lookup l $ sphereStateItems state)
-                              in if n < c || n == n' then updateSpheres state heap' else updateSpheres (state { sphereStateSpheres = Map.insert l n' (sphereStateSpheres state) }) (heap' <> heap'')
+                              in if n == n' then updateSpheres state heap' else updateSpheres (state { sphereStateSpheres = Map.insert l n' (sphereStateSpheres state) }) (heap' <> heap'')
 
 getSpheres :: SphereState i l -> Map l SphereCount
 getSpheres = sphereStateSpheres
