@@ -50,7 +50,7 @@ type ItemState = Int
 data LocationState = LocationState {
         _locationStateVisited :: Bool,
         _locationStateItem :: Maybe ItemName
-        } deriving (Eq, Ord, Show)
+        } deriving (Eq, Ord, Show, Read)
 instance Default LocationState where
     def = LocationState False Nothing
 

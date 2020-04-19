@@ -70,7 +70,7 @@ headWidget = do
 
 main :: IO ()
 main = mainWidgetWithHead headWidget $ mdo
-    (undoEvent, redoEvent) <- do
+    (undoEvent, redoEvent, resetEvent) <- do
         let undoAttr b = "type" =: "button"
                     <> "class" =: "undo-button"
                     <> "value" =: "Undo"
@@ -81,13 +81,35 @@ main = mainWidgetWithHead headWidget $ mdo
                     <> bool ("disabled" =: "") mempty b
         (undoE, _) <- elDynAttr' "input" (undoAttr <$> fromUniqDynamic (canUndo <$> trackerState)) $ blank
         (redoE, _) <- elDynAttr' "input" (redoAttr <$> fromUniqDynamic (canRedo <$> trackerState)) $ blank
-        return (fmap (const undo) $ domEvent Click undoE, fmap (const redo) $ domEvent Click redoE)
+        resetEvent <- mdo
+            isConfirm <- holdDyn False $ leftmost [(True <$ resetEvent'), (False <$ expireConfirm), (False <$ resetEvent)]
+            evs <- dyn $ ffor isConfirm $ \case
+                False -> do 
+                            (resetButton, _) <- elAttr' "input" (
+                                                "class" =: "reset-button"
+                                             <> "type"  =: "button"
+                                             <> "value" =: "Reset State" ) blank
+                            return (domEvent Click resetButton, never, never)
+                True -> do
+                            (confirmButton, _) <- elAttr' "input" (
+                                                "class" =: "reset-button reset-button-confirm"
+                                             <> "type"  =: "button"
+                                             <> "value" =: "Confirm?" ) blank
+                            built <- getPostBuild
+                            expire <- delay 2 built
+                            return (never, expire, domEvent Click confirmButton)
+            resetEvent' <- switchHold never $ fmap (^. _1) evs
+            expireConfirm <- switchHold never $ fmap (^. _2) evs
+            resetEvent <- switchHold never $ fmap (^. _3) evs
+            return resetEvent
+        return (fmap (const undo) $ domEvent Click undoE, fmap (const redo) $ domEvent Click redoE, resetEvent)
     (tracker, mapScale) <- mdo
         shown <- toggle False $ domEvent Click e
         let attr = fmap (\b -> "class" =: ("settings_container" <>  bool " hidden" "" b)) shown
-        -- savedSettings <- (>>= readMaybe . unpack ) <$> getFromStorage "settings"
-        let defaultSettings = mempty --fromMaybe mempty savedSettings
+        savedSettings <- (>>= readMaybe . unpack ) <$> getFromStorage "settings"
+        let defaultSettings = fromMaybe mempty savedSettings
         settings <- foldDynMaybe apply defaultSettings settingsChanges
+        performEvent_ $ fmap (saveInStorage "settings" . Just . pack . show) $ updated settings
         (tracker, queries) <- flip runQueryT settings $ execChoiceT $ getTracker $ Builtin TMCR
         (settingsChanges, e, mapScale) <- elDynAttr "div" attr $ do
             (e, _) <- elClass' "div" "settingsToggleShown" blank
@@ -131,7 +153,10 @@ main = mainWidgetWithHead headWidget $ mdo
             settingsChanges <- switchHold never settingsChanges'
             return (settingsChanges, e, mapScale)
         return (tracker, mapScale)
-    trackerState <- accumMaybe (&) def changes
+    savedState' <- (>>= readMaybe . unpack) <$> getFromStorage "state"
+    let savedState = (fromMaybe (mempty, mempty) savedState' & \(i,l) -> def & stateItems .~ i & stateLocations .~ l) 
+    trackerState <- accumMaybe (&) savedState $ leftmost [changes, const (Just def) <$ resetEvent]
+    performEvent_ $ fmap (saveInStorage "state" . Just . pack . show . (\s -> (s ^. stateItems, s ^. stateLocations))) $ updated $ fromUniqDynamic trackerState
     changes <- elClass "div" "tracker-container" $ do
         changes' <- dyn $ ffor tracker $ \(tracker, disp) -> do
             stateChanges <- displayTracker tracker disp mapScale trackerState
@@ -429,11 +454,11 @@ displayTrackerWidgetPrimitive disp extras items locations (Scope scope) = do
 
 getFromStorage :: (J.MonadJSM m) => Text -> m (Maybe Text)
 getFromStorage label = J.liftJSM $ do
-        v <- J.jsg "window" ^. J.js "sessionStorage" ^. J.js1 "getItem" label
-        J.fromJSVal v
+        v <- J.jsg "window" ^. J.js "localStorage" ^. J.js1 "getItem" label
+        J.fromJSValUnchecked v
 
 saveInStorage :: (J.MonadJSM m) => Text -> Maybe Text -> m ()
-saveInStorage label value = J.liftJSM $ void $ J.jsg "window" ^. J.js "sessionStorage" ^. maybe (J.js1 "removeItem" label) (J.js2 "setItem" label) value
+saveInStorage label value = J.liftJSM $ void $ J.jsg "window" ^. J.js "localStorage" ^. maybe (J.js1 "removeItem" label) (J.js2 "setItem" label) value
 
 (<..>) :: Fold s a -> Fold s a -> Fold s a
 (<..>) f g r s = fmap absurd $ (<>) <$> contramap absurd (f r s) <*> contramap absurd (g r s)
