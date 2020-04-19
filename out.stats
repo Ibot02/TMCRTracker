@@ -1,16 +1,16 @@
 code size summary per package:
 
 attoparsec-0.13.2.2-LDgoYltg4bBFT04UziremI:65597
-base:                    861829
+base:                    896891
 base64-bytestring-1.0.0.2-KHbHJJf4UE22MWUN8WJjSN:18848
 bimap-0.3.3-LS56uN7KJ1BDD7ygUKS8oX:965
 bytestring-0.10.8.2-FBklFuapa1a7kq4yflY7Bt:3034
 common-0.1.0.0-1iqVBDdT5wUDCfE1EGxsuV:162433
-containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG:332320
+containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG:335508
 data-default-class-0.1.2.0-4DQ5vBFTNGFfapRXhtzfu:106998
 dependent-map-0.3-J6d7kUT0ZYK7IgitBxw3Vc:86146
 dependent-sum-0.6.2.0-5De0IgisMpv5GobNkxtAW3:14688
-ghc-prim:                909823
+ghc-prim:                920422
 ghcjs-base-0.2.0.0-94o7qH5GqxYIuAX83RduIv:8760
 ghcjs-dom-jsffi-0.9.4.0-76Ln42WLg2C47qQnHuJVX0:119179
 ghcjs-prim-0.1.1.0-EXzjGVHQlAS2XAXcu0iCbS:10275
@@ -23,14 +23,15 @@ monoidal-containers-0.6-LQOsY8aSkl6ARSzrXIexy2:21223
 patch-0.0.2.0-7gofM7LNiLqLBnYDAlQsZX:70726
 primitive-0.6.3.0-KfguiTuxgILGqu8JEOpKRI:1293
 ref-tf-0.4.0.1-4fEDYopgtHB1kxZabrLLUM:3369
-reflex-0.6.4-FXAEkBCj0S6IbvvKiT83zp:1479123
-reflex-dom-core-0.5.3-56aziq5arSQJD2SeOBXQNm:1794406
-semialign-1-2ZdWjfX2bRBKgQJ9K0XY1U:8996
+reflex-0.6.4-FXAEkBCj0S6IbvvKiT83zp:1485325
+reflex-dom-core-0.5.3-56aziq5arSQJD2SeOBXQNm:1798412
+semialign-1-2ZdWjfX2bRBKgQJ9K0XY1U:11578
 text-1.2.3.0-G7RNccSav6I3egGIwK0cpP:12505
 these-1-EA3bKa7y0pp7XGNr21nVuT:621600
-tmcr-0.1.0.0-Cr2CqqBACzS1LaESvJ6iBC:1315914
-tracker-0.1.0.0-Ji0eXlrhn1o61p8bEax5hx:91565
-transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s:1305925
+tmcr-0.1.0.0-Cr2CqqBACzS1LaESvJ6iBC:1342992
+tracker-0.1.0.0-Ji0eXlrhn1o61p8bEax5hx:90246
+transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s:9645
+unbounded-delays-0.1.1.0-3OIBWhvs3opCI9f4squMMQ:1390949
 
 
 code size per module:
@@ -48,27 +49,28 @@ base
     Control.Exception.Base:             574
     Control.Monad.Fix:                  602
     Control.Monad.IO.Class:             11897
-    Data.Either:                        3384
+    Data.Either:                        138
+    Data.Fixed:                         3384
     Data.Foldable:                      212
     Data.Functor.Const:                 192
     Data.Functor.Contravariant:         572
     Data.Functor.Identity:              219
     Data.Functor.Product:               557
     Data.List.NonEmpty:                 2411
-    Data.Maybe:                         5604
+    Data.Maybe:                         11031
     Data.Monoid:                        10171
     Data.OldList:                       66
     Data.Proxy:                         7862
     Data.Semigroup.Internal:            565
     Data.Tuple:                         219
     Data.Type.Coercion:                 277
-    Data.Type.Equality:                 74653
+    Data.Type.Equality:                 74660
     Data.Typeable.Internal:             149
-    Data.Void:                          10700
-    Foreign.C.Error:                    1576
-    Foreign.Marshal.Alloc:              3219
-    Foreign.Storable:                   4940
-    GHC.Arr:                            21013
+    Data.Void:                          10714
+    Foreign.C.Error:                    1586
+    Foreign.Marshal.Alloc:              3241
+    Foreign.Storable:                   4983
+    GHC.Arr:                            21190
     GHC.Base:                           583
     GHC.Char:                           9888
     GHC.Conc.Sync:                      28359
@@ -104,8 +106,8 @@ base
     GHC.MVar:                           1121
     GHC.Maybe:                          2950
     GHC.Num:                            174
-    GHC.Ptr:                            18943
-    GHC.Read:                           22724
+    GHC.Ptr:                            35718
+    GHC.Read:                           25387
     GHC.Real:                           361
     GHC.STRef:                          34513
     GHC.Show:                           4163
@@ -117,11 +119,11 @@ base
     GHC.Word:                           5218
     Numeric:                            1738
     System.IO:                          15731
-    System.Posix.Internals:             23071
+    System.Posix.Internals:             24717
     Text.ParserCombinators.ReadP:       168
-    Text.ParserCombinators.ReadPrec:    66559
+    Text.ParserCombinators.ReadPrec:    67249
     Text.Printf:                        1522
-    Text.Read:                          77291
+    Text.Read:                          84741
     Text.Read.Lex:                      97
     Unsafe.Coerce:                      3972
 
@@ -144,7 +146,7 @@ common-0.1.0.0-1iqVBDdT5wUDCfE1EGxsuV
 
 containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG
     Data.IntMap.Internal:               43565
-    Data.IntMap.Strict:                 202228
+    Data.IntMap.Strict:                 205416
     Data.Map.Internal:                  86526
     Data.Set.Internal:                  1
 
@@ -161,11 +163,11 @@ dependent-sum-0.6.2.0-5De0IgisMpv5GobNkxtAW3
     Data.Some:                          6450
 
 ghc-prim
-    GHC.CString:                        32658
+    GHC.CString:                        33837
     GHC.Classes:                        139
     GHC.IntWord64:                      3052
     GHC.Tuple:                          4228
-    GHC.Types:                          869746
+    GHC.Types:                          879166
 
 ghcjs-base-0.2.0.0-94o7qH5GqxYIuAX83RduIv
     Data.JSString:                      2245
@@ -258,21 +260,22 @@ reflex-0.6.4-FXAEkBCj0S6IbvvKiT83zp
     Reflex.Query.Class:                 165987
     Reflex.Requester.Base:              1
     Reflex.Requester.Class:             605009
-    Reflex.Spider.Internal:             29547
+    Reflex.Spider.Internal:             6202
+    Reflex.Time:                        29547
     Reflex.TriggerEvent.Base:           1123
     Reflex.TriggerEvent.Class:          12936
 
 reflex-dom-core-0.5.3-56aziq5arSQJD2SeOBXQNm
     Foreign.JavaScript.TH:              29504
     Reflex.Dom.Builder.Class:           147960
-    Reflex.Dom.Builder.Class.Events:    1357776
+    Reflex.Dom.Builder.Class.Events:    1361782
     Reflex.Dom.Builder.Immediate:       104255
     Reflex.Dom.Main:                    80734
     Reflex.Dom.Widget.Basic:            70996
     Reflex.Dom.Widget.Input:            3181
 
 semialign-1-2ZdWjfX2bRBKgQJ9K0XY1U
-    Data.Semialign.Internal:            8996
+    Data.Semialign.Internal:            11578
 
 text-1.2.3.0-G7RNccSav6I3egGIwK0cpP
     Data.Text:                          728
@@ -285,19 +288,22 @@ these-1-EA3bKa7y0pp7XGNr21nVuT
     Data.These:                         621600
 
 tmcr-0.1.0.0-Cr2CqqBACzS1LaESvJ6iBC
-    Tracker.TMCR.Logic:                 1079370
-    Tracker.TMCR.Tracker:               236544
+    Tracker.TMCR.Logic:                 1090381
+    Tracker.TMCR.Tracker:               252611
 
 tracker-0.1.0.0-Ji0eXlrhn1o61p8bEax5hx
     Tracker:                            11321
-    Tracker.Display:                    68471
+    Tracker.Display:                    67152
     Tracker.Logic:                      11773
 
 transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s
     Control.Monad.Trans.Reader:         7734
-    Control.Monad.Trans.State.Strict:   1298191
+    Control.Monad.Trans.State.Strict:   1911
+
+unbounded-delays-0.1.1.0-3OIBWhvs3opCI9f4squMMQ
+    Control.Concurrent.Thread.Delay:    1390949
 
 
 
-packed metadata: 1859054
+packed metadata: 1890646
 
