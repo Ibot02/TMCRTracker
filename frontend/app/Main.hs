@@ -194,33 +194,34 @@ locationDisplayState locations reachable l = (\ls r -> if ls ^. locationStateVis
 
 
 displayLocationSelection :: forall t m. (MonadHold t m, PostBuild t m, DomBuilder t m, EventWriter t TrackerStateUpdates m) => Tracker -> TrackerDisplayData -> UniqDynamic t (Set (Either Scope LocationName)) -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> Map LocationName (UniqDynamic t (Maybe Int)) -> m ()
-displayLocationSelection tracker disp selection items locations reachable spheres = elDynClass "div" (fromUniqDynamic $ ffor selection $ \sel -> "selected-locations-view" <> bool "" " empty-selection" (null sel)) $ do
-    let summary :: UniqDynamic t LocationsDisplayState
-        summary = do
-            sel <- selection
-            ds <- forM (sel ^.. folded . _Right) $ \l -> locationDisplayState locations reachable l
-            return $ fold ds
-        attrClearSelection sel = ("class" =: "clear-selection"
-                               <> "type" =: "button"
-                               <> "value" =: "Clear selection"
-                               <> bool mempty ("disabled" =: "") (null sel))
-        attrMarkSelected sel summary = ("class" =: "mark-selection"
-                                     <> "type" =: "button"
-                                     <> "value" =: (case summary of AllVisited -> "Unmark all"; SomeReachable -> "Mark all available"; _ -> "Mark all")
-                                     <> bool mempty ("disabled" =: "") (null sel))
-    (clearEl, markEl) <- elClass "div" "button-row" $ do
-        (clearEl,_) <- elDynAttr' "input" (attrClearSelection <$> fromUniqDynamic selection) blank
-        (markEl, _) <- elDynAttr' "input" (attrMarkSelected <$> fromUniqDynamic selection <*> fromUniqDynamic summary) blank
-        return (clearEl, markEl)
-    evs <- elClass "div" "locations-list" $ dyn $ ffor (fromUniqDynamic selection) $ \sel -> do
-        evs <- forM (sel ^.. folded) $ \l -> do
-            displayLocationListEntry tracker disp l items locations reachable spheres
-        return $ mergeWith (<>) evs
-    ev <- switchHold never evs
-    tellEvent ev
-    tellEvent $ fmap (const (setSelection mempty)) $ domEvent Click clearEl
-    tellEvent $ fmap (\reachable' -> (markSelectedSatisfying reachable' `orElse` markSelected `orElse` unmarkSelected)) $ tag (current (traverse fromUniqDynamic reachable)) $ domEvent Click markEl
-    
+displayLocationSelection tracker disp selection items locations reachable spheres =
+    elDynClass "div" (fromUniqDynamic $ ffor selection $ \sel -> "selected-locations-view" <> bool "" " empty-selection" (null sel)) $ do
+        let summary :: UniqDynamic t LocationsDisplayState
+            summary = do
+                sel <- selection
+                ds <- forM (sel ^.. folded . _Right) $ \l -> locationDisplayState locations reachable l
+                return $ fold ds
+            attrClearSelection sel = ("class" =: "clear-selection"
+                                   <> "type" =: "button"
+                                   <> "value" =: "Clear selection"
+                                   <> bool mempty ("disabled" =: "") (null sel))
+            attrMarkSelected sel summary = ("class" =: "mark-selection"
+                                         <> "type" =: "button"
+                                         <> "value" =: (case summary of AllVisited -> "Unmark all"; SomeReachable -> "Mark all available"; _ -> "Mark all")
+                                         <> "accesskey" =: "m"
+                                         <> bool mempty ("disabled" =: "") (null sel))
+        (clearEl, markEl) <- elClass "div" "button-row" $ do
+            (clearEl,_) <- elDynAttr' "input" (attrClearSelection <$> fromUniqDynamic selection) blank
+            (markEl, _) <- elDynAttr' "input" (attrMarkSelected <$> fromUniqDynamic selection <*> fromUniqDynamic summary) blank
+            return (clearEl, markEl)
+        evs <- elClass "div" "locations-list" $ dyn $ ffor (fromUniqDynamic selection) $ \sel -> do
+            evs <- forM (sel ^.. folded) $ \l -> do
+                displayLocationListEntry tracker disp l items locations reachable spheres
+            return $ mergeWith (<>) evs
+        ev <- switchHold never evs
+        tellEvent ev
+        tellEvent $ fmap (const (setSelection mempty)) $ domEvent Click clearEl
+        tellEvent $ fmap (\reachable' -> (markSelectedSatisfying reachable' `orElse` markSelected `orElse` unmarkSelected)) $ tag (current (traverse fromUniqDynamic reachable)) $ domEvent Click markEl
 
 displayLocationListEntry :: forall t m. (DomBuilder t m, PostBuild t m) => Tracker -> TrackerDisplayData -> Either Scope LocationName -> Map ItemName (UniqDynamic t ItemState) -> Map LocationName (UniqDynamic t LocationState) -> Map LocationName (UniqDynamic t Bool) -> Map LocationName (UniqDynamic t (Maybe Int)) -> m (Event t TrackerStateUpdates)
 displayLocationListEntry tracker disp (Left scope) items locations reachable spheres = do
