@@ -212,11 +212,12 @@ northMap = LocationMapArea $$(staticImage "resources/maps/overworld/NorthHyruleF
     , ((64, 80), LocationMapPinLocations [Right "NorthHyruleFieldBuriedTreasure"])
     , ((48, 40), LocationMapPinLocations [Right "PreCastleCaveHeartPiece"])
     , ((36, 80), LocationMapPinLocations [Right "GreatbladeScroll"])
-    , ((72, 64), LocationMapPinLocations [Right "TingleTreeBottomLeft"])
-    , ((104, 64), LocationMapPinLocations [Right "TingleTreeBottomRight"])
-    , ((72, 48), LocationMapPinLocations [Right "TingleTreeTopLeft"])
-    , ((104, 48), LocationMapPinLocations [Right "TingleTreeTopRight"])
-    , ((88, 56), LocationMapPinLocations [Right "TingleBoomerang"])
+    -- , ((72, 64), LocationMapPinLocations [Right "TingleTreeBottomLeft"])
+    -- , ((104, 64), LocationMapPinLocations [Right "TingleTreeBottomRight"])
+    -- , ((72, 48), LocationMapPinLocations [Right "TingleTreeTopLeft"])
+    -- , ((104, 48), LocationMapPinLocations [Right "TingleTreeTopRight"])
+    -- , ((88, 56), LocationMapPinLocations [Right "TingleBoomerang"])
+    , ((88, 56), LocationMapPinLocations (Right "TingleBoomerang":[Right ("TingleTree" <> y <> x) | x <- ["Left","Right"], y <- ["Top", "Bottom"]]))
     ]
 townMap :: LocationMapArea
 townMap = LocationMapArea $$(staticImage "resources/maps/overworld/HyruleTown.png") 268 274 176 168 $ Map.fromList $
