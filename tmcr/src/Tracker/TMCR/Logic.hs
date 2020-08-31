@@ -153,7 +153,7 @@ chooseSettings (LogicFile _ _ contents) = runExceptT $ execWriterT $ flip runSta
     disj = fmap Disjunction $ P.string "(|" *> P.takeWhile isSpace *> expressionArgs <* P.takeWhile isSpace <* P.string ")"
     count = do
         P.string "(+"
-        n <- P.hexadecimal
+        n <- (P.try (P.string "0x" >> P.hexadecimal) <|> P.decimal)
         P.takeWhile isSpace
         P.string ","
         P.takeWhile isSpace
@@ -163,8 +163,8 @@ chooseSettings (LogicFile _ _ contents) = runExceptT $ execWriterT $ flip runSta
     lit = do
         f <- ((const Right <$> (P.string "Locations." <|> P.string "Helpers.")) <|> (const Left <$> P.string "Items."))
         name <- P.takeWhile isAlphaNum
-        subtype <- P.option "" $ T.cons <$> P.char '.' <*> P.takeWhile isAlphaNum
-        (dungeon, n) <- P.option ("",1) $ (,) <$> (cons <$> P.char ':' <*> P.takeWhile isAlphaNum) <*> P.option 1 (P.char ':' *> P.hexadecimal)
+        subtype <- P.option "" $ T.cons <$> P.char '.' <*> P.takeWhile (\c -> isAlphaNum c || c == '*')
+        (dungeon, n) <- P.option ("",1) $ (,) <$> (cons <$> P.char ':' <*> P.takeWhile isAlphaNum) <*> P.option 1 (P.char ':' *> (P.try (P.string "0x" >> P.hexadecimal) <|> P.decimal))
         P.takeWhile isSpace
         return $ (f (name <> subtype <> if dungeon /= ":" then dungeon else ""), n)
     runReplacements :: Text -> StateT (Int, Map Text Text) (WriterT ([Directive], [LogicRule]) (ExceptT Text m)) Text

@@ -203,8 +203,8 @@ gardenMap = LocationMapArea $$(staticImage "resources/maps/overworld/HyruleCastl
     , ((40, 12), LocationMapPinLocations [Right "CastleGardenLeftMinishHole"])
     , ((136, 12), LocationMapPinLocations [Right ("CastleGarden" <> x) | x <- ["RightMinishHole", "DrainedFountainHP"]])
     , ((164, 64), LocationMapPinLocations [Right ("Grimblade" <> x) | x <- ["HeartPiece", "Scroll"]])
-    , ((8, 88), LocationMapPinLocations [Right "CastleWildsWaterLeft"])
-    , ((24, 88), LocationMapPinLocations [Right "CastleWildsWaterRight"])
+    , ((8, 88), LocationMapPinLocations [Right "CastleWaterLeft"])
+    , ((24, 88), LocationMapPinLocations [Right "CastleWaterRight"])
     ]
 northMap :: LocationMapArea
 northMap = LocationMapArea $$(staticImage "resources/maps/overworld/NorthHyruleField.png") 268 128 176 144 $ Map.fromList $

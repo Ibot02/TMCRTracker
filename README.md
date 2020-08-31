@@ -44,5 +44,4 @@ Android apps can only be build on linux, and ios apps can only be build on macOs
 
  - The ability to select multiple locations from the map at once
  - The ability to view the logic requirements for a location
- - Saving/Loading state
  - Display changes to Pieces of Heart / Heart Containers
