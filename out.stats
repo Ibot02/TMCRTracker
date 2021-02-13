@@ -10,7 +10,7 @@ containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG:335508
 data-default-class-0.1.2.0-4DQ5vBFTNGFfapRXhtzfu:106998
 dependent-map-0.3-J6d7kUT0ZYK7IgitBxw3Vc:86146
 dependent-sum-0.6.2.0-5De0IgisMpv5GobNkxtAW3:14688
-ghc-prim:                927071
+ghc-prim:                927056
 ghcjs-base-0.2.0.0-94o7qH5GqxYIuAX83RduIv:8760
 ghcjs-dom-jsffi-0.9.4.0-76Ln42WLg2C47qQnHuJVX0:119179
 ghcjs-prim-0.1.1.0-EXzjGVHQlAS2XAXcu0iCbS:10275
@@ -28,7 +28,7 @@ reflex-dom-core-0.5.3-56aziq5arSQJD2SeOBXQNm:1798412
 semialign-1-2ZdWjfX2bRBKgQJ9K0XY1U:11578
 text-1.2.3.0-G7RNccSav6I3egGIwK0cpP:12505
 these-1-EA3bKa7y0pp7XGNr21nVuT:634781
-tmcr-0.1.0.0-Cr2CqqBACzS1LaESvJ6iBC:1343034
+tmcr-0.1.0.0-Cr2CqqBACzS1LaESvJ6iBC:1343036
 tracker-0.1.0.0-Ji0eXlrhn1o61p8bEax5hx:90246
 transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s:9645
 unbounded-delays-0.1.1.0-3OIBWhvs3opCI9f4squMMQ:1390949
@@ -167,7 +167,7 @@ ghc-prim
     GHC.Classes:                        139
     GHC.IntWord64:                      3052
     GHC.Tuple:                          4228
-    GHC.Types:                          885815
+    GHC.Types:                          885800
 
 ghcjs-base-0.2.0.0-94o7qH5GqxYIuAX83RduIv
     Data.JSString:                      2245
@@ -288,7 +288,7 @@ these-1-EA3bKa7y0pp7XGNr21nVuT
     Data.These:                         634781
 
 tmcr-0.1.0.0-Cr2CqqBACzS1LaESvJ6iBC
-    Tracker.TMCR.Logic:                 1090423
+    Tracker.TMCR.Logic:                 1090425
     Tracker.TMCR.Tracker:               252611
 
 tracker-0.1.0.0-Ji0eXlrhn1o61p8bEax5hx
